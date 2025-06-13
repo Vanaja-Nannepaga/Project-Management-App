@@ -16,6 +16,6 @@ app.use('/api/projects', require('./routes/projects'));
 app.use('/api/tickets', require('./routes/tickets'));
 
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => app.listen(5000, () => console.log('Server running on port 5000')))
-  .catch(err => console.log(err));
-
+  .then(() => console.log('Connected to MongoDB'))
+  .catch((err) => console.error('MongoDB connection failed:', err));
+  app.listen(5000, () => console.log("Server running on port 5000"));
