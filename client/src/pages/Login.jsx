@@ -1,20 +1,32 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post('/api/login', { email, password });
-      // Handle login success (e.g., redirect)
+      // 1. Use the correct backend route
+      const res = await axios.post('/api/auth/login', { email, password });
+
+      // 4. Show a success popup
+      alert('Login successful!');
+
+      // 3. Redirect to dashboard
+      navigate('/dashboard');
     } catch (err) {
-      alert('Login failed');
+      // 2. Show error details if provided
+      if (err.response && err.response.data && err.response.data.error) {
+        alert('Login failed: ' + err.response.data.error);
+      } else {
+        alert('Login failed');
+      }
     } finally {
       setLoading(false);
     }

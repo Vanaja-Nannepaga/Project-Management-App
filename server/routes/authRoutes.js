@@ -9,8 +9,10 @@ const JWT_SECRET = 'your_jwt_secret_key'; // Change this to a strong secret and 
 // Register
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password } = req.body;
-    if (!name || !email || !password) {
+  
+    console.log(req.body);
+  const {name, email, password } = req.body;
+  if (!name || !email || !password) {
       return res.status(400).json({ error: 'All fields are required.' });
     }
     let user = await User.findOne({ email });
@@ -18,7 +20,7 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'User already exists.' });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
-    user = new User({ name, email, password: hashedPassword });
+    user = new User({name, email, password: hashedPassword });
     await user.save();
     res.status(201).json({ message: 'User registered successfully.' });
   } catch (err) {

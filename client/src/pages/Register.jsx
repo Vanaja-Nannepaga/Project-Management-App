@@ -1,20 +1,32 @@
 import { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post('/api/register', { name, email, password });
-      // Handle registration success (e.g., redirect or show message)
+      const res = await axios.post('/api/auth/register', { name, email, password });
+
+      // Show success popup
+      alert("Registration successful!");
+
+      // Redirect to dashboard
+      navigate('/dashboard');
     } catch (err) {
-      alert('Registration failed');
+      // Show error popup
+      if (err.response && err.response.data && err.response.data.error) {
+        alert('Registration failed: ' + err.response.data.error);
+      } else {
+        alert('Registration failed');
+      }
     } finally {
       setLoading(false);
     }
