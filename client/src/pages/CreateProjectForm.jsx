@@ -9,26 +9,22 @@ const CreateProjectForm = ({ onProjectCreated }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('token');
-
-    const teamEmails = emails.split(',').map((e) => e.trim());
+    const teamMembers = emails
+      .split(',')
+      .map((e) => e.trim())
+      .filter((e) => e.length > 0);
 
     try {
       await axios.post(
-        '/api/projects/create',
-        { title, description, teamEmails },
+        '/api/projects',
+        { title, description, teamMembers },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      const res = await axios.get('/api/projects', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      onProjectCreated(res.data);
       setTitle('');
       setDescription('');
       setEmails('');
+      if (onProjectCreated) onProjectCreated();
     } catch (error) {
-      console.error('Project creation failed:', error);
       alert('Failed to create project.');
     }
   };
@@ -65,4 +61,3 @@ const CreateProjectForm = ({ onProjectCreated }) => {
 };
 
 export default CreateProjectForm;
-

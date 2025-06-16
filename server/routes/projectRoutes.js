@@ -2,37 +2,33 @@ const express = require('express');
 const Project = require('../models/Project');
 const router = express.Router();
 
-// Create project
+// Create
 router.post('/', async (req, res) => {
-  try {
-    const { title, description, teamMembers } = req.body;
-    const project = await Project.create({ title, description, teamMembers });
-    res.status(201).json(project);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
+  const { title, description, teamMembers } = req.body;
+  // Prevent duplicate titles (optional)
+  const exists = await Project.findOne({ title });
+  if (exists) return res.status(400).json({ error: 'Project with title exists' });
+  const project = new Project({ title, description, teamMembers });
+  await project.save();
+  res.status(201).json(project);
 });
 
-// List projects
+// List
 router.get('/', async (req, res) => {
   const projects = await Project.find();
   res.json(projects);
 });
 
-// Update project
+// Update
 router.put('/:id', async (req, res) => {
-  try {
-    const project = await Project.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json(project);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
+  const project = await Project.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  res.json(project);
 });
 
-// Delete project
+// Delete
 router.delete('/:id', async (req, res) => {
   await Project.findByIdAndDelete(req.params.id);
-  res.json({ message: 'Project deleted' });
+  res.json({ message: 'Deleted' });
 });
 
 // Add member
@@ -40,7 +36,7 @@ router.post('/:id/add-member', async (req, res) => {
   const { email } = req.body;
   const project = await Project.findByIdAndUpdate(
     req.params.id,
-    { $addToSet: { teamMembers: email } },
+    { $addToSet: { teamMembers: email } }, // prevents duplicates
     { new: true }
   );
   res.json(project);

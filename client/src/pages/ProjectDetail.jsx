@@ -5,7 +5,8 @@ import axios from '../axios';
 export default function ProjectDetail() {
   const { id } = useParams();
   const [tickets, setTickets] = useState([]);
-
+await axios.post(`/api/projects/${projectId}/add-member`, { email: 'user@example.com' });
+await axios.post(`/api/projects/${projectId}/remove-member`, { email: 'user@example.com' });
   useEffect(() => {
     axios.get(`/tickets/${id}`).then(res => setTickets(res.data));
   }, [id]);
