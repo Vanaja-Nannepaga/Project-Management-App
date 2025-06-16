@@ -1,71 +1,75 @@
 import { useState } from 'react';
-import axios from '../axios';
-import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const Register = () => {
-  const [form, setForm] = useState({ name: '', email: '', password: '' });
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    setError('');
-  };
-
-  const handleSubmit = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    if (!form.name || !form.email || form.password.length < 6) {
-      setError('All fields are required. Password must be at least 6 characters.');
-      return;
-    }
+    setLoading(true);
     try {
-      const res = await axios.post('/auth/register', form);
-      localStorage.setItem('token', res.data.token);
-      alert('Registered successfully!');
-      navigate('/dashboard');
+      await axios.post('/api/register', { name, email, password });
+      // Handle registration success (e.g., redirect or show message)
     } catch (err) {
-      setError(
-        err.response?.data?.error ||
-        err.response?.data?.message ||
-        'Registration failed.'
-      );
+      alert('Registration failed');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded shadow-md w-96 space-y-4">
-        <h2 className="text-2xl font-bold mb-4 text-center">Register</h2>
-        {error && <div className="text-red-600 text-sm mb-2">{error}</div>}
+    <div
+      className="min-h-screen flex items-center justify-center"
+      style={{
+        background: 'linear-gradient(135deg, #f5f9ff 0%, #e0e7ff 60%, #e9d5ff 100%)'
+      }}
+    >
+      <form
+        onSubmit={handleRegister}
+        className="bg-gradient-to-br from-white via-indigo-50 to-purple-50 shadow-2xl rounded-3xl px-12 py-14 flex flex-col gap-6 w-full"
+        style={{
+          maxWidth: 440,
+          minWidth: 370,
+        }}
+      >
+        <h2 className="text-3xl font-bold text-center mb-2 text-gray-900 tracking-tight">
+          Register
+        </h2>
         <input
-          name="name"
           type="text"
           placeholder="Name"
-          value={form.name}
-          onChange={handleChange}
-          className="w-full p-2 mb-3 border rounded"
+          className="p-4 rounded-xl border border-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-300 text-lg transition"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
           required
         />
         <input
-          name="email"
           type="email"
           placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          className="w-full p-2 mb-3 border rounded"
+          className="p-4 rounded-xl border border-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-300 text-lg transition"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           required
         />
         <input
-          name="password"
           type="password"
           placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-          className="w-full p-2 mb-4 border rounded"
+          className="p-4 rounded-xl border border-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-300 text-lg transition"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <button type="submit" className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600">
-          Register
+        <button
+          type="submit"
+          disabled={loading}
+          className={`w-full bg-gradient-to-r from-green-400 to-emerald-500 text-white font-bold py-3 rounded-xl shadow-md hover:from-green-500 hover:to-emerald-600 transition-all duration-200 text-lg ${
+            loading ? 'opacity-60 cursor-not-allowed' : ''
+          }`}
+        >
+          {loading ? 'Registering...' : 'Register'}
         </button>
       </form>
     </div>

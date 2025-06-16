@@ -1,52 +1,80 @@
-import React, { useState } from 'react';
-import axios from '../axios';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 const Login = () => {
-  const [form, setForm] = useState({ email: '', password: '' });
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    setError('');
-  };
-
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (!form.email || form.password.length < 6) {
-      setError('Email and password are required. Password must be at least 6 characters.');
-      return;
-    }
+    setLoading(true);
     try {
-      const res = await axios.post('/auth/login', form);
-      localStorage.setItem('token', res.data.token);
-      navigate('/dashboard');
+      await axios.post('/api/login', { email, password });
+      // Handle login success (e.g., redirect)
     } catch (err) {
-      setError(
-        err.response?.data?.error ||
-        err.response?.data?.message ||
-        'Login failed. Please check credentials.'
-      );
+      alert('Login failed');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded shadow-md w-80 space-y-4">
-        <h1 className="text-3xl font-bold text-center mb-6">Welcome to Bug Tracker</h1>
-        <h2 className="text-xl font-bold">Login</h2>
-        {error && <div className="text-red-600 text-sm mb-2">{error}</div>}
-        <input name="email" placeholder="Email" type="email" onChange={handleChange} className="input" />
-        <input name="password" placeholder="Password" type="password" onChange={handleChange} className="input" />
-        <button type="submit" className="btn">Login</button>
-        <p className="text-center mt-4 text-sm">
-          Don’t have an account?{' '}
-          <a href="/register" className="text-blue-600 underline">
-            Register here
-          </a>
-        </p>
-      </form>
+    <div
+      className="min-h-screen w-full flex flex-col"
+      style={{
+        background: 'linear-gradient(135deg, #e0e7ff 0%, #f0f4ff 50%, #e9d5ff 100%)',
+      }}
+    >
+      <h1 className="text-4xl font-extrabold mt-16 mb-10 text-center text-gray-900 tracking-tight drop-shadow-lg">
+        Welcome to Bug Tracker
+      </h1>
+      <div className="flex flex-1 items-center justify-center">
+        <form
+          onSubmit={handleLogin}
+          className="bg-gradient-to-br from-white via-indigo-50 to-purple-50 shadow-2xl rounded-3xl px-14 py-14 flex flex-col gap-6 w-full"
+          style={{
+            maxWidth: 440,
+            minWidth: 370,
+          }}
+        >
+          <h2 className="text-2xl font-bold text-left mb-2 text-gray-900 tracking-tight">
+            Login
+          </h2>
+          <input
+            type="email"
+            placeholder="Email"
+            className="p-4 rounded-xl border border-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-300 text-lg transition"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            className="p-4 rounded-xl border border-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-300 text-lg transition"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            className={`w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-bold py-3 rounded-xl shadow-md hover:from-blue-600 hover:to-indigo-600 transition-all duration-200 text-lg ${
+              loading ? 'opacity-60 cursor-not-allowed' : ''
+            }`}
+          >
+            {loading ? 'Logging in...' : 'Login'}
+          </button>
+          <div className="text-center text-gray-500 text-base mt-2">
+            Don&apos;t have an account?{' '}
+            <Link to="/register" className="text-indigo-600 hover:underline font-medium">
+              Register here
+            </Link>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
