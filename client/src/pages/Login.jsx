@@ -17,7 +17,7 @@ const Login = () => {
 
       // 4. Show a success popup
       alert('Login successful!');
-
+       localStorage.setItem("token", response.data.token);
       // 3. Redirect to dashboard
       navigate('/dashboard');
     } catch (err) {

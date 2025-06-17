@@ -4,27 +4,41 @@ import axios from 'axios';
 const CreateProjectForm = ({ onProjectCreated }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [emails, setEmails] = useState('');
+  const [teamMembers, setTeamMembers] = useState([{ name: '', email: '' }]);
   const [loading, setLoading] = useState(false);
+
+  // Handle changes for team member fields
+  const handleMemberChange = (idx, field, value) => {
+    const updated = [...teamMembers];
+    updated[idx][field] = value;
+    setTeamMembers(updated);
+  };
+
+  // Add new blank member row
+  const addMember = () => {
+    setTeamMembers([...teamMembers, { name: '', email: '' }]);
+  };
+
+  // Remove a member row
+  const removeMember = (idx) => {
+    setTeamMembers(teamMembers.filter((_, i) => i !== idx));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     const token = localStorage.getItem('token');
-    const teamMembers = emails
-      .split(',')
-      .map((e) => e.trim())
-      .filter((e) => e.length > 0);
-
+    // Only send members that have both name and email filled
+    const members = teamMembers.filter(m => m.name.trim() && m.email.trim());
     try {
       await axios.post(
         '/api/projects',
-        { title, description, teamMembers },
+        { title, description, teamMembers: members },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setTitle('');
       setDescription('');
-      setEmails('');
+      setTeamMembers([{ name: '', email: '' }]);
       if (onProjectCreated) onProjectCreated();
     } catch (error) {
       alert('Failed to create project.');
@@ -37,7 +51,7 @@ const CreateProjectForm = ({ onProjectCreated }) => {
     <form
       onSubmit={handleSubmit}
       className="bg-gradient-to-br from-[#f7f9ff] to-[#e0e7ff] border border-indigo-100 p-12 rounded-3xl shadow-2xl flex flex-col gap-6 transition-all duration-300 mx-auto"
-      style={{ maxWidth: 600, minWidth: 370, minHeight: 420 }}
+      style={{ maxWidth: 600, minWidth: 370, minHeight: 480 }}
     >
       <h2 className="text-2xl font-bold mb-2 text-indigo-700 tracking-tight">
         Create a New Project
@@ -58,13 +72,49 @@ const CreateProjectForm = ({ onProjectCreated }) => {
         rows={4}
         required
       />
-      <input
-        type="text"
-        placeholder="Invite team (emails, comma-separated)"
-        value={emails}
-        onChange={(e) => setEmails(e.target.value)}
-        className="block w-full p-4 mb-1 border border-indigo-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300 placeholder-gray-400 text-lg transition"
-      />
+
+      {/* Invite team members */}
+      <div>
+        <h3 className="text-lg font-semibold text-indigo-600 mb-2">Invite team members</h3>
+        <div className="flex flex-col gap-2">
+          {teamMembers.map((member, idx) => (
+            <div key={idx} className="flex gap-3 items-center">
+              <input
+                type="text"
+                placeholder="Name"
+                value={member.name}
+                onChange={e => handleMemberChange(idx, 'name', e.target.value)}
+                className="flex-1 min-w-[80px] p-2 border border-indigo-200 rounded-xl focus:outline-none"
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                value={member.email}
+                onChange={e => handleMemberChange(idx, 'email', e.target.value)}
+                className="flex-1 min-w-[120px] p-2 border border-indigo-200 rounded-xl focus:outline-none"
+              />
+              {teamMembers.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeMember(idx)}
+                  className="text-red-500 font-bold px-2 py-1"
+                  title="Remove member"
+                >
+                  &times;
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={addMember}
+          className="mt-2 text-indigo-600 hover:text-indigo-800 font-semibold"
+        >
+          + Add another member
+        </button>
+      </div>
+
       <button
         type="submit"
         disabled={loading}

@@ -1,33 +1,45 @@
 import { useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import axios from '../axios';
+import React, { useEffect, useState } from 'react';
+import ProjectTickets from '../components/ProjectTickets';
+import axios from 'axios';
 
-export default function ProjectDetail() {
+function ProjectDetail() {
   const { id } = useParams();
-  const [tickets, setTickets] = useState([]);
-await axios.post(`/api/projects/${projectId}/add-member`, { email: 'user@example.com' });
-await axios.post(`/api/projects/${projectId}/remove-member`, { email: 'user@example.com' });
+  const [project, setProject] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    axios.get(`/tickets/${id}`).then(res => setTickets(res.data));
+    async function fetchProject() {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await axios.get(`/api/projects/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setProject(res.data);
+      } catch (err) {
+        setProject(null);
+      }
+      setLoading(false);
+    }
+    fetchProject();
   }, [id]);
 
+  if (loading) {
+    return <div>Loading project...</div>;
+  }
+
+  if (!project) {
+    return <div>Project not found.</div>;
+  }
+
   return (
-    <div className="p-4">
-      <h1 className="text-xl font-bold mb-4">Project Tickets</h1>
-      <div className="grid grid-cols-3 gap-4">
-        {['To Do', 'In Progress', 'Done'].map(status => (
-          <div key={status} className="bg-gray-100 p-3 rounded">
-            <h2 className="font-semibold mb-2">{status}</h2>
-            {tickets.filter(t => t.status === status).map(ticket => (
-              <div key={ticket._id} className="bg-white p-2 mb-2 rounded shadow">
-                <p className="font-medium">{ticket.title}</p>
-                <p className="text-sm text-gray-600">{ticket.priority}</p>
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-2">{project.title}</h1>
+      <p className="mb-4">{project.description}</p>
+      <hr className="mb-6" />
+      <ProjectTickets projectId={id} token={localStorage.getItem('token')} />
     </div>
   );
 }
 
+export default ProjectDetail;
