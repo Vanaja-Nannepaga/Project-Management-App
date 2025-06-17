@@ -4,15 +4,13 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const router = express.Router();
 
-const JWT_SECRET = 'your_jwt_secret_key'; // Change this to a strong secret and store in .env
+const JWT_SECRET = process.env.JWT_SECRET || 'pX8kG5nLqWvT3mR2jY9hB4zA0cF7dE1iU6tS2wQ='; // Use env variable or fallback
 
 // Register
 router.post('/register', async (req, res) => {
   try {
-  
-    console.log(req.body);
-  const {name, email, password } = req.body;
-  if (!name || !email || !password) {
+    const { name, email, password } = req.body;
+    if (!name || !email || !password) {
       return res.status(400).json({ error: 'All fields are required.' });
     }
     let user = await User.findOne({ email });
@@ -20,7 +18,7 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'User already exists.' });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
-    user = new User({name, email, password: hashedPassword });
+    user = new User({ name, email, password: hashedPassword });
     await user.save();
     res.status(201).json({ message: 'User registered successfully.' });
   } catch (err) {
@@ -43,6 +41,7 @@ router.post('/login', async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ error: 'Invalid credentials.' });
     }
+    // Always return JWT as { token }
     const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1d' });
     res.json({ token, user: { name: user.name, email: user.email } });
   } catch (err) {

@@ -12,18 +12,16 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      // 1. Use the correct backend route
+      // Use the correct backend route
       const res = await axios.post('/api/auth/login', { email, password });
 
-      // 4. Show a success popup
-      alert('Login successful!');
-     
-	
+      // Save the token to localStorage (fix: use res, not response)
+      localStorage.setItem("token", res.data.token);
 
-      // 3. Redirect to dashboard
+      alert('Login successful!');
+      // Redirect to dashboard
       navigate('/dashboard');
     } catch (err) {
-      // 2. Show error details if provided
       if (err.response && err.response.data && err.response.data.error) {
         alert('Login failed: ' + err.response.data.error);
       } else {

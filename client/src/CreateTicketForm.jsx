@@ -1,33 +1,29 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axios from './axios';
 
-const CreateTicketForm = ({ projectId, team, token }) => {
+const CreateTicketForm = ({ projectId, team }) => {
   const [form, setForm] = useState({
     title: '',
     description: '',
     priority: 'Low',
     assignee: '',
-    project: projectId,
+    projectId,
   });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      const payload = {
-        ...form,
-        project: projectId, // ensure projectId is included
-      };
-
-      await axios.post('/api/tickets/create', payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
+      const payload = { ...form, projectId };
+      await axios.post('/tickets/create', payload); // <--- CORRECT ENDPOINT
       alert('Ticket created!');
-      setForm({ title: '', description: '', priority: 'Low', assignee: '', project: projectId });
+      setForm({ title: '', description: '', priority: 'Low', assignee: '', projectId });
     } catch (err) {
       console.error('Error creating ticket:', err);
-      alert('Failed to create ticket');
+      if (err.response && err.response.data && err.response.data.error) {
+        alert('Failed to create ticket: ' + err.response.data.error);
+      } else {
+        alert('Failed to create ticket');
+      }
     }
   };
 
@@ -47,7 +43,6 @@ const CreateTicketForm = ({ projectId, team, token }) => {
         onChange={(e) => setForm({ ...form, description: e.target.value })}
         required
       ></textarea>
-
       <select
         className="border p-2 w-full"
         value={form.priority}
@@ -58,7 +53,6 @@ const CreateTicketForm = ({ projectId, team, token }) => {
         <option>Medium</option>
         <option>High</option>
       </select>
-
       <select
         className="border p-2 w-full"
         value={form.assignee}
@@ -72,7 +66,6 @@ const CreateTicketForm = ({ projectId, team, token }) => {
           </option>
         ))}
       </select>
-
       <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded">
         Create Ticket
       </button>
@@ -81,4 +74,3 @@ const CreateTicketForm = ({ projectId, team, token }) => {
 };
 
 export default CreateTicketForm;
-
