@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState, useContext } from 'react';
+import axios from '../axios';
+import { UserContext } from '../context/UserContext';
 
-function TicketList({ projectId, token, refresh }) {
+function TicketList({ projectId, refresh }) {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { token } = useContext(UserContext);
 
   useEffect(() => {
     async function fetchTickets() {
       setLoading(true);
       try {
-        const res = await axios.get(`/api/tickets/project/${projectId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await axios.get(`/tickets/project/${projectId}`);
         setTickets(res.data);
       } catch (err) {
         setTickets([]);
