@@ -14,18 +14,18 @@ const CreateTicketForm = ({ projectId, team }) => {
     e.preventDefault();
     try {
       const payload = { ...form, projectId };
-      // FIX: Leading slash added
       await axios.post('/api/tickets', payload); 
       alert('Ticket created!');
+      // Only clear the form ON SUCCESS!
       setForm({ title: '', description: '', priority: 'Low', assignee: '', projectId });
     } catch (err) {
+      // Do NOT clear the form if there's an error!
       console.error('Error creating ticket:', err);
       if (err.response && err.response.data && err.response.data.error) {
         alert('Failed to create ticket: ' + err.response.data.error);
       } else {
         alert('Failed to create ticket');
       }
-      // DO NOT clear the form here
     }
   };
 
