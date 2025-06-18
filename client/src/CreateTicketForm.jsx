@@ -14,7 +14,8 @@ const CreateTicketForm = ({ projectId, team }) => {
     e.preventDefault();
     try {
       const payload = { ...form, projectId };
-      await axios.post('/tickets/create', payload); // <--- CORRECT ENDPOINT
+      // FIX: Leading slash added
+      await axios.post('/api/tickets', payload); 
       alert('Ticket created!');
       setForm({ title: '', description: '', priority: 'Low', assignee: '', projectId });
     } catch (err) {
@@ -24,6 +25,7 @@ const CreateTicketForm = ({ projectId, team }) => {
       } else {
         alert('Failed to create ticket');
       }
+      // DO NOT clear the form here
     }
   };
 

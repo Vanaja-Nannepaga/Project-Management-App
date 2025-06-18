@@ -5,7 +5,7 @@ const auth = require('../middleware/auth');
 const router = express.Router();
 
 // Create ticket
-router.post('/create', auth, async (req, res) => {
+router.post('/', auth, async (req, res) => {
   try {
     const { title, description, priority, assignee, projectId } = req.body;
     const ticket = await Ticket.create({ title, description, priority, assignee, projectId });

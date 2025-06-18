@@ -83,6 +83,11 @@ const Intro = () => {
           </p>
         </div>
       </div>
+
+      {/* COPYRIGHT FOOTER */}
+      <footer className="relative z-10 w-full text-center py-4 bg-white/80 text-blue-800 font-semibold shadow-inner">
+        &copy; 2025 Project Management App. All rights reserved.
+      </footer>
     </div>
   );
 };
