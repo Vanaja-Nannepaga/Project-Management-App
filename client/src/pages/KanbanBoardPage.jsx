@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import KanbanBoard from "../components/Kanban/KanbanBoard";
@@ -13,12 +14,16 @@ export default function KanbanBoardPage() {
     fetch(`/api/projects/${projectId}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then((res) => res.json())
-      .then((project) => {
-        setProjectName(project.title || "Unnamed Project");
-        console.log("Project data:", project);
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return res.json();
       })
-      .catch(() => {
+      .then((project) => {
+        console.log("Project data:", project);
+        setProjectName(project.title || "Unnamed Project");
+      })
+      .catch((error) => {
+        console.error("Error fetching project:", error);
         setProjectName("Unnamed Project");
       });
   }, [projectId, token]);
@@ -27,7 +32,9 @@ export default function KanbanBoardPage() {
     <div
       style={{
         padding: "2rem",
-        backgroundColor: "#e6f0fa",
+        backgroundImage: "url('https://example.com/background-image.jpg')", // Replace with a valid URL or local path
+        backgroundSize: "cover",
+        backgroundColor: "#e6f0fa", // Fallback color
         minHeight: "100vh",
         fontFamily: "Arial, sans-serif",
       }}
@@ -37,7 +44,8 @@ export default function KanbanBoardPage() {
           textAlign: "center",
           marginBottom: "2rem",
           color: "#333",
-          backgroundColor: "rgba(255,255,255,0.8)",
+          textShadow: "1px 1px 2px rgba(0, 0, 0, 0.1)",
+          backgroundColor: "rgba(255, 255, 255, 0.8)",
           padding: "1rem",
           borderRadius: "8px",
         }}
@@ -48,4 +56,3 @@ export default function KanbanBoardPage() {
     </div>
   );
 }
-

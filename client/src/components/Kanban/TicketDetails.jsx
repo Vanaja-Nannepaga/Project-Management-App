@@ -1,92 +1,77 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "../../axios";
 
-export default function TicketDetail({ ticket, onClose }) {
+
+const TicketDetail = ({ ticket, onClose }) => {
   const [comments, setComments] = useState([]);
   const [text, setText] = useState("");
   const token = localStorage.getItem("token");
 
-  useEffect(() => {
-    if (ticket?._id) {
-      axios
-        .get(`/comments/${ticket._id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((res) => setComments(res.data))
-        .catch((err) => console.error("Failed to fetch comments:", err));
-    }
-  }, [ticket]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!text.trim()) return;
+  const fetchComments = async () => {
     try {
-      await axios.post(
-        `/comments/${ticket._id}`,
-        { text },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setText("");
       const res = await axios.get(`/comments/${ticket._id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setComments(res.data);
     } catch (err) {
+      console.error("Failed to fetch comments:", err);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!text.trim()) return;
+
+    try {
+      await axios.post(`/comments/${ticket._id}`, { text }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setText("");
+      fetchComments();
+    } catch (err) {
       console.error("Failed to post comment:", err);
     }
   };
 
+  useEffect(() => {
+    fetchComments();
+  }, []);
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-[90%] max-w-xl relative">
-        <button
-          onClick={onClose}
-          className="absolute top-2 right-3 text-xl text-gray-600 hover:text-red-500"
-        >
-          ✕
-        </button>
-
-        <h2 className="text-xl font-bold mb-2">{ticket.title}</h2>
-        <p className="mb-4 text-sm text-gray-700">{ticket.description}</p>
-
-        <h3 className="font-semibold mb-2">Comments</h3>
-        <div className="max-h-[200px] overflow-y-auto space-y-2 mb-4">
-          {comments.length === 0 && (
-            <p className="text-gray-500 text-sm">No comments yet.</p>
-          )}
-          {comments.map((c) => (
-            <div
-              key={c._id}
-              className="border bg-gray-100 p-2 rounded text-sm"
-            >
-              <div className="font-medium">
-                {c.userId?.name || "User"} •{" "}
-                <span className="text-xs text-gray-500">
-                  {new Date(c.createdAt).toLocaleString()}
-                </span>
-              </div>
-              <p>{c.text}</p>
-            </div>
-          ))}
-        </div>
-
-        <form onSubmit={handleSubmit}>
-          <textarea
-            className="w-full border p-2 rounded mb-2"
-            rows="3"
-            placeholder="Write a comment..."
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-          />
-          <button
-            type="submit"
-            className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-          >
-            Post Comment
-          </button>
-        </form>
+    <div className="bg-white border p-4 rounded shadow mt-2">
+      <div className="flex justify-between items-center">
+        <h3 className="font-semibold">Comments</h3>
+        <button onClick={onClose} className="text-red-600 text-sm">✖ Close</button>
       </div>
+
+      <div className="mt-2 space-y-2 max-h-[200px] overflow-y-auto">
+        {comments.map((c) => (
+          <div key={c._id} className="bg-gray-100 p-2 rounded">
+            <p className="text-sm">{c.text}</p>
+            <span className="text-xs text-gray-500">
+              {new Date(c.createdAt).toLocaleString()}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <form onSubmit={handleSubmit} className="mt-3">
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Add a comment..."
+          className="w-full p-2 border rounded"
+        />
+        <button
+          type="submit"
+          className="bg-blue-500 text-white px-4 py-1 mt-1 rounded hover:bg-blue-600"
+        >
+          Post Comment
+        </button>
+      </form>
     </div>
   );
-}
+};
+
+export default TicketDetail;
 
