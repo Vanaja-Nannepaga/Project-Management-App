@@ -3,7 +3,8 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const projectRoutes = require('./routes/projectRoutes');
 const ticketRoutes = require('./routes/ticketRoutes');
-const authRoutes = require('./routes/authRoutes'); // FIX: import authRoutes
+const authRoutes = require('./routes/authRoutes');
+const commentRoutes = require("./routes/comments");
 
 const app = express();
 
@@ -13,7 +14,8 @@ app.use(express.json());
 
 app.use('/api/projects', projectRoutes);
 app.use('/api/tickets', ticketRoutes);
-app.use('/api/auth', authRoutes); // FIX: use authRoutes for authentication endpoints
+app.use('/api/auth', authRoutes);
+app.use("/api/comments", commentRoutes);
 
 // Your MongoDB connection and server listen code
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })

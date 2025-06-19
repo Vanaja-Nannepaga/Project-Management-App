@@ -1,146 +1,116 @@
 import React, { useEffect, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import axios from "../../axios";
+import TicketDetail from "./TicketDetails"; // ✅ correct import
 
-const columnsMeta = {
-  todo: { title: "To Do", status: "Open" },
-  inprogress: { title: "In Progress", status: "In Progress" },
-  done: { title: "Done", status: "Closed" },
+const statusTypes = {
+  todo: "Open",
+  inprogress: "In Progress",
+  done: "Done",
 };
 
-export default function KanbanBoard({ projectId, token }) {
-  const [columns, setColumns] = useState({
-    todo: [],
-    inprogress: [],
-    done: [],
-  });
+const KanbanBoard = ({ projectId }) => {
+  const [tickets, setTickets] = useState([]);
+  const [selectedTicket, setSelectedTicket] = useState(null);
 
-  useEffect(() => {
-    if (!projectId) return;
-
-    fetch(`/api/tickets/project/${projectId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        return res.json();
-      })
-      .then((tickets) => {
-        console.log("Fetched tickets:", tickets);
-        const grouped = {
-          todo: [],
-          inprogress: [],
-          done: [],
-        };
-
-        tickets.forEach((ticket) => {
-          const key = Object.entries(columnsMeta).find(
-            ([, meta]) => meta.status === ticket.status
-          )?.[0] || "todo";
-          if (ticket._id) {
-            grouped[key].push(ticket);
-          }
-        });
-
-        setColumns(grouped);
-      })
-      .catch((error) => console.error("Error fetching tickets:", error));
-  }, [projectId, token]);
-
-  const handleDragEnd = async (result) => {
-    const { source, destination, draggableId } = result;
-    if (!destination) return;
-
-    const sourceCol = source.droppableId;
-    const destCol = destination.droppableId;
-
-    if (sourceCol === destCol && source.index === destination.index) return;
-
-    const sourceList = Array.from(columns[sourceCol]);
-    const [movedTicket] = sourceList.splice(source.index, 1);
-
-    const destList = Array.from(columns[destCol]);
-    destList.splice(destination.index, 0, movedTicket);
-
-    const newStatus = columnsMeta[destCol].status;
-    movedTicket.status = newStatus;
-
-    const newColumns = {
-      ...columns,
-      [sourceCol]: sourceList,
-      [destCol]: destList,
-    };
-
-    setColumns(newColumns);
-
+  const fetchTickets = async () => {
     try {
-      const response = await fetch(`/api/tickets/${draggableId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
-
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    } catch (error) {
-      console.error("Error updating ticket:", error);
+      const res = await axios.get(`/tickets/project/${projectId}`);
+      setTickets(res.data || []); // fallback to empty array
+    } catch (err) {
+      console.error("Failed to fetch tickets:", err);
+      setTickets([]); // safe fallback
     }
   };
 
+  useEffect(() => {
+    fetchTickets();
+  }, [projectId]);
+
+  const handleDragEnd = async (result) => {
+    const { destination, source, draggableId } = result;
+    if (!destination || destination.droppableId === source.droppableId) return;
+
+    const updatedStatus = destination.droppableId;
+    try {
+      await axios.put(`/tickets/${draggableId}`, { status: updatedStatus });
+      fetchTickets();
+    } catch (err) {
+      console.error("Failed to update ticket status:", err);
+    }
+  };
+
+  const getTicketsByStatusKey = (key) => {
+    const statusValue = statusTypes[key];
+    return tickets.filter((ticket) => ticket.status === statusValue);
+  };
+
   return (
-    <DragDropContext onDragEnd={handleDragEnd}>
-      <div style={{ display: "flex", gap: "24px", justifyContent: "center" }}>
-        {Object.entries(columnsMeta).map(([key, { title }]) => (
-          <Droppable droppableId={key} key={key}>
-            {(provided) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                style={{
-                  backgroundColor: "#f0e68c",
-                  padding: "12px",
-                  width: "300px",
-                  minHeight: "500px",
-                  borderRadius: "8px",
-                }}
-              >
-                <h2 style={{ textAlign: "center", color: "#333" }}>{title}</h2>
-                {columns[key].map((ticket, index) => (
-                  <Draggable key={ticket._id} draggableId={ticket._id} index={index}>
-                    {(provided) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        style={{
-                          userSelect: "none",
-                          margin: "0 0 8px 0",
-                          padding: "16px",
-                          backgroundColor: "#add8e6",
-                          borderRadius: "4px",
-                          boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
-                          ...provided.draggableProps.style,
-                        }}
-                      >
-                        <strong>{ticket.title}</strong>
-                        <div>{ticket.description}</div>
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-                {columns[key].length === 0 && (
-                  <div style={{ color: "#aaa", textAlign: "center", marginTop: "2rem" }}>
-                    No tickets available
-                  </div>
-                )}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        ))}
-      </div>
-    </DragDropContext>
+    <div className="p-4 bg-blue-100 min-h-screen">
+      <h2 className="text-center text-xl font-semibold mb-4">
+        Kanban Board - Bug Tracker
+      </h2>
+
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <div className="flex justify-around gap-4">
+          {Object.keys(statusTypes).map((key) => (
+            <Droppable key={key} droppableId={key}>
+              {(provided) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className="bg-yellow-200 w-1/3 min-h-[400px] p-3 rounded-md shadow-md"
+                >
+                  <h3 className="text-center font-bold mb-2">
+                    {statusTypes[key]}
+                  </h3>
+                  {getTicketsByStatusKey(key).map((ticket, index) => (
+                    <Draggable
+                      key={ticket._id}
+                      draggableId={ticket._id}
+                      index={index}
+                    >
+                      {(provided) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          className="bg-blue-200 p-2 rounded mb-2 shadow"
+                        >
+                          <strong>{ticket.title}</strong>
+                          <p className="text-sm">{ticket.description}</p>
+                          <button
+                            onClick={() => setSelectedTicket(ticket)}
+                            className="mt-2 text-sm text-white bg-blue-600 px-2 py-1 rounded hover:bg-blue-700"
+                          >
+                            💬 View Comments
+                          </button>
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                  {getTicketsByStatusKey(key).length === 0 && (
+                    <p className="text-center text-gray-500">
+                      No tickets available
+                    </p>
+                  )}
+                </div>
+              )}
+            </Droppable>
+          ))}
+        </div>
+      </DragDropContext>
+
+      {selectedTicket && (
+        <TicketDetail
+          ticket={selectedTicket}
+          onClose={() => setSelectedTicket(null)}
+        />
+      )}
+    </div>
   );
-}
+};
+
+export default KanbanBoard;
 
