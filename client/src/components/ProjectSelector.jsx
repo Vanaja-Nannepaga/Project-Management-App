@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "../axios";
+import { useNavigate, useParams } from "react-router-dom";
 
-export default function ProjectSelector({ value, onChange }) {
+export default function ProjectSelector() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState("");
+  const navigate = useNavigate();
+  const params = useParams();
 
   useEffect(() => {
     axios.get("/projects")
@@ -11,27 +15,36 @@ export default function ProjectSelector({ value, onChange }) {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    if (params.id) setSelected(params.id);
+    else setSelected("");
+  }, [params.id]);
+
   if (loading) return <div>Loading projects...</div>;
 
   return (
-    <div>
-      <div className="mb-2 font-semibold text-indigo-700">Choose Project:</div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+    <div className="flex items-center gap-2 mb-8">
+      <label htmlFor="project-dropdown" className="font-semibold text-indigo-700">
+        Choose Project:
+      </label>
+      <select
+        id="project-dropdown"
+        className="px-4 py-2 rounded-lg border border-indigo-300 bg-white shadow-sm text-indigo-700 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-400 max-w-xs"
+        value={selected}
+        onChange={e => {
+          setSelected(e.target.value);
+          if (e.target.value) {
+            navigate(`/projects/${e.target.value}`);
+          }
+        }}
+      >
+        <option value="">Select...</option>
         {projects.map(project => (
-          <button
-            type="button"
-            key={project._id}
-            onClick={() => onChange(project._id)}
-            className={`rounded-lg shadow p-6 text-center transition border-2 
-              ${value === project._id ? 'border-indigo-500 bg-indigo-50' : 'border-transparent bg-white'}
-              hover:border-indigo-400 hover:bg-indigo-100`}
-          >
-            <div className="font-bold text-indigo-700 text-lg">
-              {project.name || project.title || project.projectName || "No Name"}
-            </div>
-          </button>
+          <option key={project._id} value={project._id}>
+            {project.name || project.title || project.projectName || "No Name"}
+          </option>
         ))}
-      </div>
+      </select>
     </div>
   );
 }

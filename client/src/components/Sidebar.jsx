@@ -1,31 +1,38 @@
+import React from "react";
 import { Link, useLocation } from "react-router-dom";
 
-const navLinks = [
-  { to: "/dashboard", label: "Dashboard Home" },
-  { to: "/projects", label: "Projects" },
-  { to: "/tickets", label: "Tickets" }
-];
-
 export default function Sidebar() {
-  const { pathname } = useLocation();
+  const location = useLocation();
+
+  const navLinks = [
+    { to: "/dashboard", label: "Dashboard Home" },
+    { to: "/create-project", label: "Create New Project" },
+    { to: "/projects", label: "Projects" },
+    { to: "/tickets", label: "Tickets" },
+  ];
+
   return (
-    <div className="bg-gradient-to-b from-indigo-200 to-indigo-50 min-h-screen w-60 px-6 py-8">
-      <div className="mb-10 font-bold text-2xl text-indigo-700">Bug Tracker</div>
+    <aside className="sidebar bg-gradient-to-b from-[#e6e8fa] to-[#f3f0ff] min-h-screen p-6 w-64 shadow-lg flex flex-col">
+      <h2 className="text-3xl font-extrabold text-indigo-700 mb-10 tracking-tight text-center drop-shadow">Bug Tracker</h2>
       <nav className="flex flex-col gap-3">
-        {navLinks.map(link => (
+        {navLinks.map(({ to, label }) => (
           <Link
-            key={link.to}
-            to={link.to}
-            className={`py-2 px-3 rounded transition font-medium ${
-              pathname === link.to
-                ? "bg-indigo-500 text-white"
-                : "text-gray-700 hover:text-indigo-700 hover:bg-indigo-100"
+            key={to}
+            to={to}
+            className={`py-2.5 px-5 rounded-lg text-lg transition-all duration-200 ${
+              location.pathname === to
+                ? "bg-indigo-200 text-indigo-900 font-bold shadow"
+                : "hover:bg-indigo-100 hover:text-indigo-700 text-indigo-700"
             }`}
           >
-            {link.label}
+            {label}
           </Link>
         ))}
       </nav>
-    </div>
+      {/* Optional: Add a divider and a footer */}
+      <div className="mt-auto pt-10 border-t border-indigo-100 text-xs text-indigo-400 text-center">
+        &copy; {new Date().getFullYear()} Bug Tracker App
+      </div>
+    </aside>
   );
 }

@@ -1,25 +1,51 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 
+// Optionally, map path segments to readable names
+const pathMap = {
+  "dashboard": "Dashboard",
+  "projects": "Projects",
+  "tickets": "Tickets",
+  "create-project": "Create Project"
+};
+
 export default function Breadcrumbs() {
-  const { pathname } = useLocation();
-  const crumbs = pathname.split("/").filter(Boolean);
+  const location = useLocation();
+  const pathnames = location.pathname.split("/").filter(Boolean);
 
   return (
-    <nav className="text-sm text-gray-500 mb-6">
-      <Link to="/" className="hover:underline text-indigo-600">Home</Link>
-      {crumbs.map((crumb, idx) => {
-        const path = "/" + crumbs.slice(0, idx + 1).join("/");
-        return (
-          <span key={idx}>
-            <span className="mx-2">/</span>
-            {idx === crumbs.length - 1
-              ? <span className="font-semibold text-gray-800">{crumb}</span>
-              : <Link to={path} className="hover:underline text-indigo-600">{crumb}</Link>
-            }
-          </span>
-        );
-      })}
+    <nav
+      className="w-full overflow-x-auto text-lg py-2" // <-- text-lg for bigger font!
+      aria-label="Breadcrumb"
+    >
+      <ol className="flex flex-wrap items-center space-x-2 max-w-full">
+        <li>
+          <Link to="/dashboard" className="text-indigo-600 hover:underline font-semibold">
+            Dashboard
+          </Link>
+        </li>
+        {pathnames.map((name, idx) => {
+          const routeTo = "/" + pathnames.slice(0, idx + 1).join("/");
+          const isLast = idx === pathnames.length - 1;
+          return (
+            <li key={routeTo} className="flex items-center">
+              <span className="mx-1 text-gray-400">{">"}</span>
+              {isLast ? (
+                <span className="font-bold text-indigo-900 truncate max-w-[120px] block">
+                  {pathMap[name] || decodeURIComponent(name)}
+                </span>
+              ) : (
+                <Link
+                  to={routeTo}
+                  className="text-indigo-600 hover:underline truncate max-w-[120px] block"
+                >
+                  {pathMap[name] || decodeURIComponent(name)}
+                </Link>
+              )}
+            </li>
+          );
+        })}
+      </ol>
     </nav>
   );
 }
