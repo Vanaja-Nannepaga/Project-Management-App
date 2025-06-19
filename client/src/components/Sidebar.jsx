@@ -9,6 +9,7 @@ export default function Sidebar() {
     { to: "/create-project", label: "Create New Project" },
     { to: "/projects", label: "Projects" },
     { to: "/tickets", label: "Tickets" },
+    
   ];
 
   return (

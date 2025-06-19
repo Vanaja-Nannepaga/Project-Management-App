@@ -12,58 +12,86 @@ import DashboardLayout from "./pages/DashboardLayout";
 import DashboardHome from "./pages/DashboardHome";
 import ProjectsPage from "./pages/ProjectsPage";
 import TicketsPage from "./pages/TicketsPage";
-import CreateTicketForm from "./CreateTicketForm";
 import CreateTicketFormPage from "./pages/CreateTicketFormPage";
+import KanbanBoardPage from "./pages/KanbanBoardPage";
 
+import { Toaster } from "react-hot-toast";
 import Breadcrumbs from "./components/Breadcrumbs";
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Intro />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/contact" element={<Contact />} />
-      <Route path="/faq" element={<Faq />} />
-      <Route path="/register" element={<Register />} />
-      
-<Route path="/projects/:projectId/create-ticket" element={<CreateTicketFormPage />} />
-<Route path="/projects/:projectId/create-ticket" element={<CreateTicketFormPage />} />
-      <Route path="/projects/:id" element={
-        <>
-          <Breadcrumbs />
-          <ProjectDetail />
-        </>
-      } />
-      <Route path="/create-project" element={
-        <>
-          <Breadcrumbs />
-          <CreateProjectForm />
-        </>
-      } />
-      {/* DashboardLayout: all dashboard pages get sidebar/topbar */}
-      <Route element={<DashboardLayout />}>
-        <Route path="/dashboard" element={
-          <>
-            <Breadcrumbs />
-            <DashboardHome />
-          </>
-        } />
-        <Route path="/projects" element={
-          <>
-            <Breadcrumbs />
-            <ProjectsPage />
-          </>
-        } />
-        <Route path="/tickets" element={
-          <>
-            <Breadcrumbs />
-            <TicketsPage />
-          </>
-        } />
-      </Route>
-    </Routes>
+   
+      <>
+        <Toaster position="top-center" />
+        <Routes>
+          <Route path="/" element={<Intro />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/faq" element={<Faq />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/projects/:projectId/create-ticket" element={<CreateTicketFormPage />} />
+          <Route
+            path="/projects/:id"
+            element={
+              <>
+                <Breadcrumbs />
+                <ProjectDetail />
+              </>
+            }
+          />
+          <Route
+            path="/create-project"
+            element={
+              <>
+                <Breadcrumbs />
+                <CreateProjectForm />
+              </>
+            }
+          />
+          <Route element={<DashboardLayout />}>
+            <Route
+              path="/dashboard"
+              element={
+                <>
+                  <Breadcrumbs />
+                  <DashboardHome />
+                </>
+              }
+            />
+            <Route
+              path="/projects"
+              element={
+                <>
+                  <Breadcrumbs />
+                  <ProjectsPage />
+                </>
+              }
+            />
+            <Route
+              path="/tickets"
+              element={
+                <>
+                  <Breadcrumbs />
+                  <TicketsPage />
+                </>
+              }
+            />
+            <Route
+              path="/projects/:projectId/kanban"
+              element={
+                <>
+                  <Breadcrumbs />
+                  <KanbanBoardPage />
+                </>
+              }
+            />
+          </Route>
+        </Routes>
+      </>
+  
   );
 }
 
 export default App;
+

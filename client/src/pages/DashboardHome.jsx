@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "../axios";
+import ProjectCard from "../components/ProjectCard";
 
 function UpdateMembersModal({ project, onClose, onUpdated }) {
   const [title, setTitle] = useState(project?.name || project?.title || "");
@@ -246,53 +247,12 @@ export default function DashboardHome() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {projects.map(project => (
-              <div
+              <ProjectCard
                 key={project._id}
-                className="rounded-xl shadow bg-white hover:bg-indigo-50 border border-indigo-100 p-6 transition flex flex-col items-center relative"
-              >
-                <div className="font-bold text-indigo-700 text-lg mb-2 text-center">
-                  {project.name || project.title || project.projectName || "No Name"}
-                </div>
-                <div className="text-gray-600 text-sm mb-6 text-center min-h-[40px]">
-                  {project.description || "No description provided."}
-                </div>
-                <div className="flex flex-row gap-3 mt-auto">
-                  <a
-                    href={`/projects/${project._id}`}
-                    className="px-4 py-2 rounded text-sm font-semibold shadow transition
-                      bg-gradient-to-r from-indigo-400 to-indigo-600 text-white
-                      hover:from-indigo-500 hover:to-indigo-700"
-                  >
-                    View Details
-                  </a>
-                  <a
-                    href="https://github.com/Vanaja-Nannepaga/Project-Management-App.git"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-4 py-2 rounded text-sm font-semibold shadow transition
-                      bg-gradient-to-r from-green-400 to-green-600 text-white
-                      hover:from-green-500 hover:to-green-700"
-                  >
-                    Github Link
-                  </a>
-                  {/* Update Button */}
-                  <button
-                    className="px-4 py-2 rounded text-sm font-semibold shadow transition
-                      bg-yellow-500 text-white hover:bg-yellow-600"
-                    onClick={() => handleUpdateClick(project)}
-                  >
-                    Update
-                  </button>
-                  {/* Delete Button */}
-                  <button
-                    className="px-4 py-2 rounded text-sm font-semibold shadow transition
-                      bg-red-500 text-white hover:bg-red-700"
-                    onClick={() => handleDeleteClick(project)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
+                project={project}
+                onUpdateClick={handleUpdateClick}
+                onDeleteClick={handleDeleteClick}
+              />
             ))}
           </div>
         )}

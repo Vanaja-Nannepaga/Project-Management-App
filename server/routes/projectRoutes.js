@@ -1,5 +1,6 @@
 const express = require('express');
 const Project = require('../models/Project');
+const auth = require('../middleware/auth');
 const router = express.Router();
 
 // Create
@@ -22,10 +23,11 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', auth, async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);
     if (!project) return res.status(404).json({ error: "Project not found" });
+    console.log("Project fetched:", project); // Add log to verify data
     res.json(project);
   } catch (e) {
     res.status(500).json({ error: "Server error" });
@@ -55,7 +57,6 @@ router.post('/:id/add-member', async (req, res) => {
     const project = await Project.findById(req.params.id);
     if (!project) return res.status(404).json({ error: "Project not found" });
 
-    // Check if this member already exists
     if (project.teamMembers.some(m => m.email === email)) {
       return res.status(400).json({ error: "Member already exists" });
     }
@@ -75,7 +76,7 @@ router.post('/:id/remove-member', async (req, res) => {
   const { email } = req.body;
   const project = await Project.findByIdAndUpdate(
     req.params.id,
-    { $pull: { teamMembers: { email } } }, // Fix to pull by object property
+    { $pull: { teamMembers: { email } } },
     { new: true }
   );
   res.json(project);

@@ -28,7 +28,9 @@ router.get('/project/:projectId', auth, async (req, res) => {
 router.put('/:id', auth, async (req, res) => {
   try {
     const ticket = await Ticket.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json(ticket);
+    if (!ticket) return res.status(404).json({ error: "Ticket not found" });
+    console.log("Updated ticket:", ticket); // Log to verify update
+    res.json({ message: "Ticket updated", ticket });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
