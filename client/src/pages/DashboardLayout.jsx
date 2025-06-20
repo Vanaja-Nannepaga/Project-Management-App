@@ -3,17 +3,21 @@ import { Outlet } from "react-router-dom";
 
 export default function DashboardLayout() {
   return (
-    <div className="min-h-screen flex bg-gradient-to-tr from-white to-indigo-100">
+    <div className="min-h-screen w-full relative flex flex-col md:flex-row">
+      {/* Matching Gradient Background */}
+      <div className="absolute inset-0 w-full h-full z-0 bg-gradient-to-b from-[#a1e9ff] via-[#2a7a8c] to-[#1a1a1a]"></div>
+
+      {/* Sidebar - Will stack on mobile */}
       <Sidebar />
-      <div className="flex-1 flex flex-col">
-        {/* Top bar */}
-        <header className="h-16 flex items-center px-8 bg-white shadow-sm mb-4">
-          <div className="text-xl font-semibold text-indigo-700">Dashboard</div>
-        </header>
-        <main className="flex-1 px-8 py-6 bg-transparent">
+
+      {/* Main Content Area */}
+      <div className="relative z-10 flex-1 flex flex-col">
+        {/* Main content with proper padding */}
+        <main className="flex-1 px-4 sm:px-6 md:px-8 py-4 sm:py-6 bg-transparent">
           <Outlet />
         </main>
       </div>
     </div>
   );
 }
+

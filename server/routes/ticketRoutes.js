@@ -3,6 +3,59 @@ const router = express.Router();
 const Ticket = require('../models/Ticket');
 const auth = require('../middleware/auth');
 
+
+
+// Get tickets by project
+router.get('/filter', auth, async (req, res) => {
+  try {
+    const { projectId, status, priority, assignee, search } = req.query;
+    
+    // Basic validation
+    if (!projectId) {
+      return res.status(400).json({ error: "projectId is required" });
+    }
+
+    const filter = { project: projectId };
+    
+    if (status) filter.status = status;
+    if (priority) filter.priority = priority;
+    
+    if (assignee) {
+      // Check if assignee is a valid ObjectId
+      if (mongoose.Types.ObjectId.isValid(assignee)) {
+        filter.assignee = assignee;
+      } else {
+        // Try to find user by email
+        const user = await User.findOne({ email: assignee });
+        if (user) {
+          filter.assignee = user._id;
+        } else {
+          return res.status(404).json({ error: "Assignee not found" });
+        }
+      }
+    }
+    
+    let tickets = await Ticket.find(filter)
+      .populate('assignee', 'name email')
+      .lean();
+
+    // Apply search filter if provided
+    if (search) {
+      const searchRegex = new RegExp(search, 'i');
+      tickets = tickets.filter(ticket => 
+        searchRegex.test(ticket.title) || 
+        (ticket.description && searchRegex.test(ticket.description))
+      );
+    }
+
+    res.json(tickets);
+  } catch (err) {
+    console.error("Filter error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
 // Create Ticket
 router.post('/', auth, async (req, res) => {
   try {

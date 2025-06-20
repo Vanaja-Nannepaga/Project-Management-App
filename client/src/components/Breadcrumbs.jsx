@@ -1,7 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 
-// Optionally, map path segments to readable names
 const pathMap = {
   "dashboard": "Dashboard",
   "projects": "Projects",
@@ -15,12 +14,19 @@ export default function Breadcrumbs() {
 
   return (
     <nav
-      className="w-full overflow-x-auto text-lg py-2" // <-- text-lg for bigger font!
+      className="w-full overflow-x-auto text-lg py-3 px-4 rounded-lg"
       aria-label="Breadcrumb"
+      style={{
+        background: "linear-gradient(to right, #2d3a42, #34444e)",
+        boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
+      }}
     >
       <ol className="flex flex-wrap items-center space-x-2 max-w-full">
         <li>
-          <Link to="/dashboard" className="text-indigo-600 hover:underline font-semibold">
+          <Link 
+            to="/dashboard" 
+            className="text-[#b8dff5] hover:underline font-semibold hover:text-[#d6edff]"
+          >
             Dashboard
           </Link>
         </li>
@@ -29,15 +35,15 @@ export default function Breadcrumbs() {
           const isLast = idx === pathnames.length - 1;
           return (
             <li key={routeTo} className="flex items-center">
-              <span className="mx-1 text-gray-400">{">"}</span>
+              <span className="mx-1 text-[#8faebf]">{">"}</span>
               {isLast ? (
-                <span className="font-bold text-indigo-900 truncate max-w-[120px] block">
+                <span className="font-bold text-[#d6edff] truncate max-w-[120px] md:max-w-[200px] block">
                   {pathMap[name] || decodeURIComponent(name)}
                 </span>
               ) : (
                 <Link
                   to={routeTo}
-                  className="text-indigo-600 hover:underline truncate max-w-[120px] block"
+                  className="text-[#b8dff5] hover:underline truncate max-w-[120px] md:max-w-[200px] block hover:text-[#d6edff]"
                 >
                   {pathMap[name] || decodeURIComponent(name)}
                 </Link>
